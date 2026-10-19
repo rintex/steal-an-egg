@@ -62,6 +62,8 @@ subprocess.run([rojo, 'build', 'default.project.json', '-o', 'build/StealAnEgg.r
 subprocess.run([rojo, 'build', 'default.project.json', '-o', 'build/StealAnEgg.rbxl'], check=True)
 if Path(lune).is_file():
     subprocess.run([lune, 'run', 'scripts/package-place.luau'], check=True)
+    subprocess.run([lune, 'run', 'tests/startup-native.spec.luau'], check=True)
+    subprocess.run([sys.executable, 'scripts/check_client_startup.py'], check=True)
 else:
     print('SKIP editor map packaging: Lune is not installed; raw Rojo output generates its map after Play.', flush=True)
 tree = ET.parse(BUILD / 'StealAnEgg.rbxlx')

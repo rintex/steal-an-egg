@@ -4,6 +4,14 @@ local fs=require('@lune/fs')
 local roblox=require('@lune/roblox')
 local model=roblox.deserializePlace(fs.readFile('build/StealAnEgg.rbxl'))
 local world=model:GetService('Workspace')
+world:SetAttribute('HeistBuild','STUDIO-FIX-04')
+world.StreamingEnabled=false
+-- An engine-replicated screen remains visible even if the client bootstrap
+-- cannot start; the bootstrap replaces its message and hides it on success.
+local starterGui=model:GetService('StarterGui')
+local boot=roblox.Instance.new('ScreenGui'); boot.Name='EggHeistStartup'; boot.ResetOnSpawn=false; boot.DisplayOrder=200; boot.Parent=starterGui
+local panel=roblox.Instance.new('Frame'); panel.Name='Card'; panel.AnchorPoint=roblox.Vector2.new(.5,0); panel.Position=roblox.UDim2.new(.5,0,0,24); panel.Size=roblox.UDim2.new(.9,0,0,116); panel.BackgroundColor3=roblox.Color3.fromRGB(21,32,48); panel.BorderSizePixel=0; panel.Parent=boot
+local status=roblox.Instance.new('TextLabel'); status.Name='Status'; status.BackgroundTransparency=1; status.Position=roblox.UDim2.fromOffset(14,10); status.Size=roblox.UDim2.new(1,-28,1,-20); status.TextColor3=roblox.Color3.fromRGB(242,247,250); status.FontFace=roblox.Font.fromEnum(roblox.Enum.Font.GothamBold); status.TextSize=16; status.TextWrapped=true; status.Text='STUDIO-FIX-04 / START\nЗапускаем игру. Если надпись не меняется, запусти Play (F5) с игроком.'; status.Parent=panel
 local originalSources={}
 for _,object in model:GetDescendants() do
  if object:IsA('LuaSourceContainer') then originalSources[object:GetFullName()]=object.Source end

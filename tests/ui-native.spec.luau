@@ -18,7 +18,7 @@ local function event(instance,key)
  if not signals[instance][key] then signals[instance][key]=signal() end
  return signals[instance][key]
 end
-for _,name in ipairs({'Destroying','MouseEnter','MouseLeave','MouseButton1Down','MouseButton1Up','SelectionGained','SelectionLost','Activated','DescendantAdded'}) do
+for _,name in ipairs({'ChildAdded','Destroying','MouseEnter','MouseLeave','MouseButton1Down','MouseButton1Up','SelectionGained','SelectionLost','Activated','DescendantAdded'}) do
  r.implementProperty('Instance',name,function(instance) return event(instance,name) end)
 end
 r.implementMethod('Instance','GetPropertyChangedSignal',function(instance,key) return event(instance,'prop_'..key) end)

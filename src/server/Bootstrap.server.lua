@@ -1,4 +1,9 @@
 --!strict
+local function describeError(failure) return debug.traceback(tostring(failure),2) end
+workspace:SetAttribute("HeistBuild","STUDIO-FIX-04")
+workspace:SetAttribute("HeistServerState","Starting")
+workspace:SetAttribute("HeistServerStage","BOOT")
+local function initialize()
 local Players=game:GetService("Players")
 local ReplicatedStorage=game:GetService("ReplicatedStorage")
 local remotesFolder=Instance.new("Folder"); remotesFolder.Name="Remotes"; remotesFolder.Parent=ReplicatedStorage
@@ -6,7 +11,9 @@ local remotes={}
 for _,name in ipairs({"Action","State","Notice","Effect"}) do
     local remote=Instance.new("RemoteEvent"); remote.Name=name; remote.Parent=remotesFolder; remotes[name]=remote
 end
+workspace:SetAttribute("HeistServerStage","DATA")
 local data=require(script.Parent.Services.DataService).new()
+workspace:SetAttribute("HeistServerStage","WORLD")
 local gameService=require(script.Parent.Services.GameService).new(remotes,data)
 remotes.Action.OnServerEvent:Connect(function(...) gameService:action(...) end)
 Players.PlayerAdded:Connect(function(player) gameService:add(player) end)
@@ -59,3 +66,13 @@ game:BindToClose(function()
     local deadline=os.clock()+25
     while (remaining>0 or next(gameService.Joining)~=nil or next(gameService.Removing)~=nil) and os.clock()<deadline do task.wait(.1) end
 end)
+
+    workspace:SetAttribute("HeistServerStage","READY")
+    workspace:SetAttribute("HeistServerState","Ready")
+end
+local ok,failure=xpcall(initialize,describeError)
+if not ok then
+    workspace:SetAttribute("HeistServerState","Failed")
+    workspace:SetAttribute("HeistStartupError",string.sub(tostring(failure),1,400))
+    warn("EggHeist startup failed: "..tostring(failure))
+end
