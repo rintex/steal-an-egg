@@ -13,12 +13,17 @@ local FAILURE_LIMIT = 110
 function Data.new()
     local self = setmetatable({}, Data)
     self.Session = game.JobId .. HttpService:GenerateGUID(false)
-    self.Store = DataStoreService:GetDataStore("EggHeist_Profiles_v1")
     self.Entries = {}
     self.Loading = {}
     -- Studio defaults to isolated volatile sessions. Opt in using a server attribute, on a TEST place.
     self.Memory = RunService:IsStudio() and workspace:GetAttribute("EnableStudioDataStore") ~= true
-    if self.Memory then warn("EggHeist: Studio memory mode; progress is NOT saved between play sessions") end
+    if self.Memory then
+        warn("EggHeist: Studio memory mode; progress is NOT saved between play sessions")
+    else
+        -- Merely obtaining a store can fail for an unpublished Studio file.
+        -- Local play does not need any DataStore API or publication permission.
+        self.Store = DataStoreService:GetDataStore("EggHeist_Profiles_v1")
+    end
     return self
 end
 function Data:load(player)

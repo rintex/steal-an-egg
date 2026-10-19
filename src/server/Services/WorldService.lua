@@ -167,7 +167,40 @@ local function clearMeadow(pos,margin)
     end
     return true
 end
+-- Packaged places contain this exact geometry for the editor. Reuse it at
+-- runtime and remove only explicitly tagged display actors, never user objects.
+local function preparedWorld()
+    local map=workspace:FindFirstChild("Map")
+    if not map or map:GetAttribute("HeistBakedVersion")~=1 then return nil end
+    local hub=map:FindFirstChild("Hub")
+    local bases=map:FindFirstChild("PlayerBases")
+    local eggs=map:FindFirstChild("Eggs")
+    local nests=map:FindFirstChild("Nests")
+    local biomes=map:FindFirstChild("Biomes")
+    local meadow=biomes and biomes:FindFirstChild("GreenMeadow")
+    local secret=meadow and meadow:FindFirstChild("SecretShrine")
+    local board=hub and hub:FindFirstChild("ServerScores")
+    local gui=board and board:FindFirstChild("Label")
+    local boardText=gui and gui:FindFirstChildWhichIsA("TextLabel")
+    if not hub or not bases or not eggs or not nests or not secret or not boardText then return nil end
+    local entries={}
+    for i=1,3 do
+        local nest=nests:FindFirstChild("Nest"..i)
+        if not nest or not nest:IsA("BasePart") then return nil end
+        table.insert(entries,{Part=nest,Home=nest.CFrame.Position+Vector3.new(10,3,5),Index=i})
+    end
+    for _,folder in ipairs({map,bases,eggs}) do
+        for _,object in ipairs(folder:GetChildren()) do
+            if object:GetAttribute("HeistEditorDisplay")==true then object:Destroy() end
+        end
+    end
+    return {Map=map,Hub=hub,Bases=bases,Eggs=eggs,Nests=entries,Secret=secret,Board=boardText}
+end
 function World.build()
+    local existing=preparedWorld()
+    if existing then return existing end
+    local previous=workspace:FindFirstChild("Map")
+    if previous and previous:GetAttribute("HeistBakedVersion")==1 then previous:Destroy() end
     local map=Instance.new("Folder"); map.Name="Map"; map.Parent=workspace
     local hub=Instance.new("Folder"); hub.Name="Hub"; hub.Parent=map
     local biomes=Instance.new("Folder"); biomes.Name="Biomes"; biomes.Parent=map

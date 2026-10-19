@@ -60,6 +60,10 @@ else:
 
 subprocess.run([rojo, 'build', 'default.project.json', '-o', 'build/StealAnEgg.rbxlx'], check=True)
 subprocess.run([rojo, 'build', 'default.project.json', '-o', 'build/StealAnEgg.rbxl'], check=True)
+if Path(lune).is_file():
+    subprocess.run([lune, 'run', 'scripts/package-place.luau'], check=True)
+else:
+    print('SKIP editor map packaging: Lune is not installed; raw Rojo output generates its map after Play.', flush=True)
 tree = ET.parse(BUILD / 'StealAnEgg.rbxlx')
 scripts = tree.findall('.//Item[@class="ModuleScript"]') + tree.findall('.//Item[@class="Script"]') + tree.findall('.//Item[@class="LocalScript"]')
 assert len(scripts) == len(files), (len(scripts), len(files))

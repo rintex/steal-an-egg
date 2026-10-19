@@ -65,6 +65,18 @@ test("DataService: prolonged outage kicks before the lease can expire",function(
     records={}; local p=user(7); local a=Data.new(); assert(a:load(p)); a.Entries[p].LastSave=os.time()-120
     failure=true; assert(not a:save(p,false)); failure=false; assert(p.Kicked)
 end)
+test("DataService: unpublished Studio can start when GetDataStore is forbidden",function()
+    studio=true
+    local original=services.DataStoreService.GetDataStore
+    services.DataStoreService.GetDataStore=function() error("You must publish this place to the web to access DataStore") end
+    local ok,result=pcall(function()
+        local a=Data.new(); local p=user(81)
+        assert(a.Memory and a:load(p)); assert(a:save(p,true))
+        return a
+    end)
+    services.DataStoreService.GetDataStore=original; studio=false
+    assert(ok,result)
+end)
 test("DataService: Studio mode never writes persistent storage",function()
     studio=true; local before=writes; local a=Data.new(); local p=user(8)
     assert(a.Memory and a:load(p)); assert(a:save(p,true)); assert(writes==before); studio=false
